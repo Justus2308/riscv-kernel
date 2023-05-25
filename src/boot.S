@@ -1,14 +1,110 @@
+.option norvc
+
 .section .init, "ax"
+.globl isr_vector
+
+isr_vector:
+	csrrw sp, mscratch, sp
+	addi sp, sp, -(4*35)
+
+	sw x31,	(4*34)(sp)
+	sw x30,	(4*33)(sp)
+	sw x29,	(4*32)(sp)
+	sw x28,	(4*31)(sp)
+	sw x27,	(4*30)(sp)
+	sw x26,	(4*29)(sp)
+	sw x25,	(4*28)(sp)
+	sw x24,	(4*27)(sp)
+	sw x23,	(4*26)(sp)
+	sw x22,	(4*25)(sp)
+	sw x21,	(4*24)(sp)
+	sw x20,	(4*23)(sp)
+	sw x19,	(4*22)(sp)
+	sw x18,	(4*21)(sp)
+	sw x17,	(4*20)(sp)
+	sw x16,	(4*19)(sp)
+	sw x15,	(4*18)(sp)
+	sw x14,	(4*17)(sp)
+	sw x13,	(4*16)(sp)
+	sw x12,	(4*15)(sp)
+	sw x11,	(4*14)(sp)
+	sw x10,	(4*13)(sp)
+	sw x9,	(4*12)(sp)
+	sw x8,	(4*11)(sp)
+	sw x7,	(4*10)(sp)
+	sw x6,	(4* 9)(sp)
+	sw x5,	(4* 8)(sp)
+	sw x4,	(4* 7)(sp)
+	sw x3,	(4* 6)(sp)
+	sw x2,	(4* 5)(sp) # sp
+	sw x1,	(4* 4)(sp) # ra
+
+	csrr s0, mcause
+	sw s0,	(4* 2)(sp)
+
+	csrr s1, mstatus
+	sw s1,	(4 *1)(sp)
+
+	csrr s2, mepc
+	sw s2,	(4 *0)(sp)
+
+	# call interrupt handler
+	mv a0, sp
+	jal interrupt_handler
+	mv sp, a0
+
+
+	lw s0,	(4* 0)(sp)
+	csrw mepc, s0
+
+	lw s0,	(4* 1)(sp)
+	csrw mstatus, s0
+
+	lw x1,	(4* 4)(sp)
+
+	lw x3,	(4* 6)(sp)
+	lw x4,	(4* 7)(sp)
+	lw x5,	(4* 8)(sp)
+	lw x6,	(4* 9)(sp)
+	lw x7,	(4*10)(sp)
+	lw x8,	(4*11)(sp)
+	lw x9,	(4*12)(sp)
+	lw x10, (4*13)(sp)
+	lw x11, (4*14)(sp)
+	lw x12, (4*15)(sp)
+	lw x13, (4*16)(sp)
+	lw x14, (4*17)(sp)
+	lw x15, (4*18)(sp)
+	lw x16, (4*19)(sp)
+	lw x17, (4*20)(sp)
+	lw x18, (4*21)(sp)
+	lw x19, (4*22)(sp)
+	lw x20, (4*23)(sp)
+	lw x21, (4*24)(sp)
+	lw x22, (4*25)(sp)
+	lw x23, (4*26)(sp)
+	lw x24, (4*27)(sp)
+	lw x25, (4*28)(sp)
+	lw x26, (4*29)(sp)
+	lw x27, (4*30)(sp)
+	lw x28, (4*31)(sp)
+	lw x29, (4*32)(sp)
+	lw x30, (4*33)(sp)
+	lw x31, (4*34)(sp)
+
+	addi sp, sp, (4*35)
+	csrrw sp, mscratch, sp
+	mret
+
+
 .globl _start
 
 _start:
-	lui ra, %hi(_start_abs)
-	jr %lo(_start_abs)(ra)
-
-_start_abs:
 	.cfi_startproc
 	.cfi_undefined ra
 
+	# initialize registers to 0
+	# x0 : hardwired zero
 	li x1, 0
 	li x2, 0
 	li x3, 0
@@ -43,43 +139,37 @@ _start_abs:
 	.option push
 	.option norelax
 
-	la gp, __global_ptr$
+	la gp, __global_pointer
 
 	.option pop
 
-	#ifdef SMODE
-	mv t2, a0
-	#else
-	csrr t2, mhartid
-	#endif
+	# reset s-mode state
+	csrw satp, zero
 
-	lui t0, %hi(_max_hart_id)
-	add t0, t0, %lo(_max_hart_id)
-	bgtu t2, t0, abort
+	# setup stack pointer
+	lui sp, %hi(__stack_top)
+	add sp, sp, %lo(__stack_top)
 
-	/* stack */
-	la sp, __stack_top
-	lui t0, %hi(_hart_stack_size)
-	add t0, t0, %lo(_hart_stack_size)
-
-
-
-	.cfi_endproc
-
-
-/* load boot trap vector */
-	la t0, boot_trap_vector
+	# setup interrupt vector
+	lui t0, %hi(isr_vector)
+	add sp, sp, %lo(isr_vector)
 	csrw mtvec, t0
 
-.section .trap, "ax"
-.align 2
+	# clear .bss
+	lui t0, %hi(__bss_start)
+	add t0, t0, %lo(__bss_start)
 
-boot_trap_vector:
-	.cfi_startproc
-	csrr t0, mcause
-	csrr t1, mepc
-	csrr t2, mtval
-	j boot_trap_vector
+	lui t1, %hi(__bss_end)
+	add t1, t1, %lo(__bss_end)
+
+bss_clear:
+	sw zero, (t0)
+	add t0, t0, 4
+	blt t0, t1, bss_clear
+
+	# call kernel main
+	jal main
+
 	.cfi_endproc
 
 .section .text.abort

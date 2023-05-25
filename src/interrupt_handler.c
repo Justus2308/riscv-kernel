@@ -1,3 +1,5 @@
+#include "debug.h"
+
 #define MCAUSE_INT_MASK		0x80000000
 #define MCAUSE_CODE_MASK	0x7FFFFFFF
 
