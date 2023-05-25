@@ -7,7 +7,7 @@ SECTIONS {
 		*(.init*);
 		*(.text*);
 	}
-	.bss : ALIGN(4K) {
+	.bss (NOLOAD) : ALIGN(4K) { /* does NOLOAD affext sp/gp provides? */
 		PROVIDE(__bss_start = .);
 		*(.bss*);
 		. += 4096;

@@ -1,10 +1,108 @@
-.option norvc
+###################
+# setup C runtime #
+###################
+
+.option norvc # disable compressed instructions
+
+.globl main
 
 .section .init, "ax"
-.globl isr_vector
+.globl _start
 
-isr_vector:
+_start:
+	.cfi_startproc
+	.cfi_undefined ra
+
+	# reset m-mode status
+	li t0, 0x1880
+	csrw mstatus, t0
+
+	# reset s-mode access
+	csrw satp, zero
+
+	# setup interrupt vector
+	lui t0, %hi(isr_vector)
+	add sp, sp, %lo(isr_vector)
+	csrw mtvec, t0
+
+	# setup MIE, MIP
+	csrw mip, zero
+	li t0, 0x0080
+	csrw mie, t0
+
+	# setup global pointer
+	.option push
+	.option norelax
+
+	la gp, __global_pointer
+
+	.option pop
+
+	# clear .bss
+	lui t0, %hi(__bss_start)
+	add t0, t0, %lo(__bss_start)
+
+	lui t1, %hi(__bss_end)
+	add t1, t1, %lo(__bss_end)
+
+	# setup stack pointer
+	lui sp, %hi(__stack_top)
+	add sp, sp, %lo(__stack_top)
+
+	
+
+bss_clear:
+	sw zero, (t0)
+	add t0, t0, 4
+	blt t0, t1, bss_clear
+
+	# initialize registers to 0
+	# x0 : hardwired zero
+	li x1,	0
+	li x2,	0
+	li x3,	0
+	li x4,	0
+	li x5,	0
+	li x6,	0
+	li x7,	0
+	li x8,	0
+	li x9,	0
+	li x10,	0 # a0 -> argc for main
+	li x11,	0 # a1 -> argv for main
+	li x12,	0
+	li x13,	0
+	li x14,	0
+	li x15,	0
+	li x16,	0
+	li x17,	0
+	li x18,	0
+	li x19,	0
+	li x20,	0
+	li x21,	0
+	li x22,	0
+	li x23,	0
+	li x24,	0
+	li x25,	0
+	li x26,	0
+	li x27,	0
+	li x28,	0
+	li x29,	0
+	li x30,	0
+	li x31,	0
+
+	# call kernel main
+	jal main
+
+	.cfi_endproc
+
+
+######################
+# setup trap handler #
+######################
+
+__trap_handler:
 	csrrw sp, mscratch, sp
+
 	addi sp, sp, -(4*35)
 
 	sw x31,	(4*34)(sp)
@@ -25,10 +123,10 @@ isr_vector:
 	sw x16,	(4*19)(sp)
 	sw x15,	(4*18)(sp)
 	sw x14,	(4*17)(sp)
-	sw x13,	(4*16)(sp)
-	sw x12,	(4*15)(sp)
-	sw x11,	(4*14)(sp)
-	sw x10,	(4*13)(sp)
+	sw x13,	(4*16)(sp) # a3
+	sw x12,	(4*15)(sp) # a2
+	sw x11,	(4*14)(sp) # a1
+	sw x10,	(4*13)(sp) # a0
 	sw x9,	(4*12)(sp)
 	sw x8,	(4*11)(sp)
 	sw x7,	(4*10)(sp)
@@ -96,81 +194,6 @@ isr_vector:
 	csrrw sp, mscratch, sp
 	mret
 
-
-.globl _start
-
-_start:
-	.cfi_startproc
-	.cfi_undefined ra
-
-	# initialize registers to 0
-	# x0 : hardwired zero
-	li x1, 0
-	li x2, 0
-	li x3, 0
-	li x4, 0
-	li x5, 0
-	li x6, 0
-	li x7, 0
-	li x8, 0
-	li x9, 0
-	/* skip a0, a1 */
-	li x12, 0
-	li x13, 0
-	li x14, 0
-	li x15, 0
-	li x16, 0
-	li x17, 0
-	li x18, 0
-	li x19, 0
-	li x20, 0
-	li x21, 0
-	li x22, 0
-	li x23, 0
-	li x24, 0
-	li x25, 0
-	li x26, 0
-	li x27, 0
-	li x28, 0
-	li x29, 0
-	li x30, 0
-	li x31, 0
-
-	.option push
-	.option norelax
-
-	la gp, __global_pointer
-
-	.option pop
-
-	# reset s-mode state
-	csrw satp, zero
-
-	# setup stack pointer
-	lui sp, %hi(__stack_top)
-	add sp, sp, %lo(__stack_top)
-
-	# setup interrupt vector
-	lui t0, %hi(isr_vector)
-	add sp, sp, %lo(isr_vector)
-	csrw mtvec, t0
-
-	# clear .bss
-	lui t0, %hi(__bss_start)
-	add t0, t0, %lo(__bss_start)
-
-	lui t1, %hi(__bss_end)
-	add t1, t1, %lo(__bss_end)
-
-bss_clear:
-	sw zero, (t0)
-	add t0, t0, 4
-	blt t0, t1, bss_clear
-
-	# call kernel main
-	jal main
-
-	.cfi_endproc
 
 .section .text.abort
 .globl abort

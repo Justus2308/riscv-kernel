@@ -1,25 +1,16 @@
+#include "async_handler.h"
+#include "sync_handler.h"
+
 #include "debug.h"
 
 #define MCAUSE_INT_MASK		0x80000000
 #define MCAUSE_CODE_MASK	0x7FFFFFFF
 
-
-#define MSCRATCH			0x00000340
-#define MEPC				0x00000341
-#define MCAUSE				0x00000342
-#define MTVAL				0x00000343
-#define MIP					0x00000344
-#define MTINST				0x0000034A
-#define MTVAL2				0x0000034B
+#define MSTATUS				0x300
+#define MEPC				0x341
+#define MCAUSE				0x342
 
 
-static int async_handler[] = {
-	0
-};
-
-static int sync_handler[] = {
-	0
-};
 
 unsigned long read_csr(unsigned long mreg) {
 	unsigned long val;
@@ -37,9 +28,9 @@ void software_handler() {
 	if (mcause_v & MCAUSE_INT_MASK) {
 		// Branch to interrupt handler here
 		// Index into 32-bit array containing addresses of functions
-		async_handler[(mcause_v & MCAUSE_CODE_MASK)];
+		async_handler[(mcause_v & MCAUSE_CODE_MASK)]();
 	} else {
 		// Branch to exception handler
-		sync_handler[(mcause_v & MCAUSE_CODE_MASK)];
+		sync_handler[(mcause_v & MCAUSE_CODE_MASK)]();
 	}
 }
