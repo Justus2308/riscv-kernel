@@ -11,6 +11,8 @@ word_length:		.byte 0b00000011
 fifo_reset:		.byte 0b00000111
 interrupt_enable:	.byte 0b00000011
 
+thr_empty:		.byte 0b00100000
+
 
 .text
 uart_init:
@@ -42,6 +44,8 @@ uart_init:
 	lb t1, interrupt_enable
 	sb t1, IER(t0)
 
+	ret
+
 	.cfi_endproc
 
 # putc and getc funcs assume that proper uart mode is enabled
@@ -49,18 +53,28 @@ uart_init:
 uart_putc: # char from a0
 	.cfi_startproc
 
-	addi sp, sp, -16
-	sw fp, 12(sp)
-	addi fp, sp, 16
+	addi sp, sp, -4
+	sw fp, (sp)
+	addi fp, sp, 4
 	mv a5, a0
 	# sb a5, -9(fp)
 
 	lui t0, %hi(__uart_base)
 	addi t0, %lo(__uart_base)
 
+	# spin until thr is empty
+	lb t1, thr_empty
+putc_waitforthr:
+	lb t2, LSR(t0)
+	and t2, t1, t2
+	bne t1, t2, putc_waitforthr
+
+	# write char to thr
 	sb a5, THR(t0)
 
-	# TODO #
+	lw fp, (sp)
+	addi sp, sp, 4
+	ret
 
 	.cfi_endproc
 

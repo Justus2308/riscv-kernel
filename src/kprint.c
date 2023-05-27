@@ -17,8 +17,10 @@ static inline void uart_writereg(unsigned long reg, unsigned long val) {
 
 
 void kprint(char *str) {
-	/* check if  */
-	if (uart_readreg(LSR) & ) {}
+	/* check if reciever is ready */
+	if (uart_readreg(LSR) & 0x11111001) {
+		// handle error
+	}
 
 	char *tmp = str;
 	if (tmp == 0) return;
