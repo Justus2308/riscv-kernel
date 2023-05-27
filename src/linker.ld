@@ -23,3 +23,5 @@ SECTIONS {
 		*(.data*);
 	}
 }
+
+PROVIDE(__uart_base = 0x10000000)

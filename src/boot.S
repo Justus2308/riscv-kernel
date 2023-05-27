@@ -18,7 +18,7 @@ _start:
 	csrw mstatus, t0
 
 	# reset s-mode access
-	csrw satp, zero
+	# csrw satp, zero
 
 	# setup interrupt vector
 	lui t0, %hi(isr_vector)
@@ -148,7 +148,7 @@ __trap_handler:
 
 	# call interrupt handler
 	mv a0, sp
-	jal interrupt_handler
+	jal trap_handler
 	mv sp, a0
 
 
