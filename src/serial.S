@@ -1,10 +1,4 @@
-#define RHR 0
-#define THR 0
-#define IER 1
-#define FCR 2
-#define ISR 2
-#define LCR 3
-#define LSR 5
+.include "kprint.h"
 
 .globl uart_init
 .globl uart_putc
@@ -17,6 +11,8 @@ word_length:		.byte 0b00000011
 fifo_reset:		.byte 0b00000111
 interrupt_enable:	.byte 0b00000011
 
+
+.text
 uart_init:
 	.cfi_startproc
 
@@ -48,6 +44,7 @@ uart_init:
 
 	.cfi_endproc
 
+# putc and getc funcs assume that proper uart mode is enabled
 
 uart_putc: # char from a0
 	.cfi_startproc

@@ -91,7 +91,7 @@ bss_clear:
 	li x31,	0
 
 	# call kernel main
-	jal main
+	jal kernel_main
 
 	.cfi_endproc
 
