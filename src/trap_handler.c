@@ -1,5 +1,6 @@
 #include "async_handler.h"
 #include "sync_handler.h"
+#include "util.h"
 
 #include "debug.h"
 
@@ -10,9 +11,8 @@
 #define MEPC				0x341
 #define MCAUSE				0x342
 
-
-
-unsigned long read_csr(unsigned long mreg) {
+/* moved to sutil.S */
+/*unsigned long read_csr(unsigned long mreg) {
 	unsigned long val;
 	asm volatile (
 		"csrr %0, %1"
@@ -20,9 +20,9 @@ unsigned long read_csr(unsigned long mreg) {
 		: "r" (mreg)
 	);
 	return val;
-}
+}*/
 
-void interrupt_handler() {
+void trap_handler() {
 	unsigned long mcause_v = read_csr(MCAUSE);
 
 	if (mcause_v & MCAUSE_INT_MASK) {

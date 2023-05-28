@@ -4,8 +4,6 @@
 
 .option norvc # disable compressed instructions
 
-.globl main
-
 .section .init, "ax"
 .globl _start
 
@@ -21,8 +19,7 @@ _start:
 	# csrw satp, zero
 
 	# setup interrupt vector
-	lui t0, %hi(isr_vector)
-	add sp, sp, %lo(isr_vector)
+	la t0, __trap_handler
 	csrw mtvec, t0
 
 	# setup MIE, MIP
@@ -39,15 +36,12 @@ _start:
 	.option pop
 
 	# clear .bss
-	lui t0, %hi(__bss_start)
-	add t0, t0, %lo(__bss_start)
+	la t0, __bss_start
 
-	lui t1, %hi(__bss_end)
-	add t1, t1, %lo(__bss_end)
+	la t1, __bss_end
 
 	# setup stack pointer
-	lui sp, %hi(__stack_top)
-	add sp, sp, %lo(__stack_top)
+	la sp, __stack_top
 
 	
 

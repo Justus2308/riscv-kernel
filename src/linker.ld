@@ -1,6 +1,6 @@
-ENTRY(_start)
+ENTRY(_start);
 
-. = 0x80000000
+. = 0x80000000;
 
 SECTIONS {
 	.text : ALIGN(4K) {
@@ -24,4 +24,4 @@ SECTIONS {
 	}
 }
 
-PROVIDE(__uart_base = 0x10000000)
+PROVIDE(__uart_base = 0x10000000);

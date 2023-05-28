@@ -1,10 +1,16 @@
-.include "kprint.h"
+#define RHR 0
+#define THR 0
+#define IER 1
+#define FCR 2
+#define ISR 2
+#define LCR 3
+#define LSR 5
 
 .globl uart_init
 .globl uart_putc
 .globl uart_getc
 
-.rodata
+.data
 divisor_enable:		.byte 0b10000000
 baud_rate:		.byte 0b00000011
 word_length:		.byte 0b00000011
@@ -18,8 +24,7 @@ thr_empty:		.byte 0b00100000
 uart_init:
 	.cfi_startproc
 
-	lui t0, %hi(__uart_base)
-	addi t0, %lo(__uart_base)
+	la t0, __uart_base
 
 	# disable interrupts
 	sb zero, IER(t0)
@@ -59,8 +64,7 @@ uart_putc: # char from a0
 	mv a5, a0
 	# sb a5, -9(fp)
 
-	lui t0, %hi(__uart_base)
-	addi t0, %lo(__uart_base)
+	la t0, __uart_base
 
 	# spin until thr is empty
 	lb t1, thr_empty
