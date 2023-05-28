@@ -6,7 +6,7 @@ To build the kernel run
 ```
 $ make TARGET
 ```  
-with the appropiate target.
+with the appropriate target.
 
 ### Makefile targets:
 
@@ -21,6 +21,7 @@ with the appropiate target.
 * **elfclasses:** compile without linking and print elf classes of objects
 * **symbols:** compile without linking and print all defined symbols
 
+&nbsp;
 ### Dependencies:
 
 * qemu-system-riscv32
