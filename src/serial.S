@@ -1,10 +1,5 @@
-#define RHR 0
-#define THR 0
-#define IER 1
-#define FCR 2
-#define ISR 2
-#define LCR 3
-#define LSR 5
+#include "config.h"
+#include "uart.h"
 
 .globl uart_init
 .globl uart_putc
@@ -58,9 +53,9 @@ uart_init:
 uart_putc: # char from a0
 	.cfi_startproc
 
-	addi sp, sp, -4
-	sw fp, (sp)
-	addi fp, sp, 4
+	addi sp, sp, -REGBYTES
+	STORE fp, (sp)
+	addi fp, sp, REGBYTES
 	mv a5, a0
 	# sb a5, -9(fp)
 
@@ -76,8 +71,8 @@ putc_waitforthr:
 	# write char to thr
 	sb a5, THR(t0)
 
-	lw fp, (sp)
-	addi sp, sp, 4
+	LOAD fp, (sp)
+	addi sp, sp, REGBYTES
 	ret
 
 	.cfi_endproc
@@ -86,9 +81,9 @@ putc_waitforthr:
 uart_getc:
 	.cfi_startproc
 
-	addi sp, sp, -8
-	sw fp, 4(sp)
-	addi fp, sp, 8
+	addi sp, sp, -(REGBYTES*2)
+	sw fp, (REGBYTES)(sp)
+	addi fp, sp, (REGBYTES*2)
 
 	# TODO #
 

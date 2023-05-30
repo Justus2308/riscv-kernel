@@ -1,6 +1,5 @@
 #include "kprint.h"
-
-#include "debug.h"
+#include "uart.h"
 
 
 static inline volatile unsigned char *uart_regadd(unsigned long reg) {

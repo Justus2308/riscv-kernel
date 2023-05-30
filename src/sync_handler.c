@@ -1,7 +1,5 @@
 #include "sync_handler.h"
 
-#include "debug.h"
-
 
 const void (*sync_handler[24])(void) = {
 

@@ -1,7 +1,5 @@
 #include "async_handler.h"
 
-#include "debug.h"
-
 
 const void (*async_handler[16])(void) = {
 	

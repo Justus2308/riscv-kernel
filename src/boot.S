@@ -1,3 +1,5 @@
+#include "config.h"
+
 ###################
 # setup C runtime #
 ###################
@@ -46,8 +48,8 @@ _start:
 	
 
 bss_clear:
-	sw zero, (t0)
-	add t0, t0, 4
+	STORE zero, (t0)
+	add t0, t0, REGBYTES
 	blt t0, t1, bss_clear
 
 	# initialize registers to 0
@@ -97,48 +99,48 @@ bss_clear:
 __trap_handler:
 	csrrw sp, mscratch, sp
 
-	addi sp, sp, -(4*35)
+	addi sp, sp, -(REGBYTES*35)
 
-	sw x31,	(4*34)(sp)
-	sw x30,	(4*33)(sp)
-	sw x29,	(4*32)(sp)
-	sw x28,	(4*31)(sp)
-	sw x27,	(4*30)(sp)
-	sw x26,	(4*29)(sp)
-	sw x25,	(4*28)(sp)
-	sw x24,	(4*27)(sp)
-	sw x23,	(4*26)(sp)
-	sw x22,	(4*25)(sp)
-	sw x21,	(4*24)(sp)
-	sw x20,	(4*23)(sp)
-	sw x19,	(4*22)(sp)
-	sw x18,	(4*21)(sp)
-	sw x17,	(4*20)(sp)
-	sw x16,	(4*19)(sp)
-	sw x15,	(4*18)(sp)
-	sw x14,	(4*17)(sp)
-	sw x13,	(4*16)(sp) # a3
-	sw x12,	(4*15)(sp) # a2
-	sw x11,	(4*14)(sp) # a1
-	sw x10,	(4*13)(sp) # a0
-	sw x9,	(4*12)(sp)
-	sw x8,	(4*11)(sp)
-	sw x7,	(4*10)(sp)
-	sw x6,	(4* 9)(sp)
-	sw x5,	(4* 8)(sp)
-	sw x4,	(4* 7)(sp)
-	sw x3,	(4* 6)(sp)
-	sw x2,	(4* 5)(sp) # sp
-	sw x1,	(4* 4)(sp) # ra
+	STORE x31, (REGBYTES*34)(sp)
+	STORE x30, (REGBYTES*33)(sp)
+	STORE x29, (REGBYTES*32)(sp)
+	STORE x28, (REGBYTES*31)(sp)
+	STORE x27, (REGBYTES*30)(sp)
+	STORE x26, (REGBYTES*29)(sp)
+	STORE x25, (REGBYTES*28)(sp)
+	STORE x24, (REGBYTES*27)(sp)
+	STORE x23, (REGBYTES*26)(sp)
+	STORE x22, (REGBYTES*25)(sp)
+	STORE x21, (REGBYTES*24)(sp)
+	STORE x20, (REGBYTES*23)(sp)
+	STORE x19, (REGBYTES*22)(sp)
+	STORE x18, (REGBYTES*21)(sp)
+	STORE x17, (REGBYTES*20)(sp)
+	STORE x16, (REGBYTES*19)(sp)
+	STORE x15, (REGBYTES*18)(sp)
+	STORE x14, (REGBYTES*17)(sp)
+	STORE x13, (REGBYTES*16)(sp) # a3
+	STORE x12, (REGBYTES*15)(sp) # a2
+	STORE x11, (REGBYTES*14)(sp) # a1
+	STORE x10, (REGBYTES*13)(sp) # a0
+	STORE x9,  (REGBYTES*12)(sp)
+	STORE x8,  (REGBYTES*11)(sp)
+	STORE x7,  (REGBYTES*10)(sp)
+	STORE x6,  (REGBYTES* 9)(sp)
+	STORE x5,  (REGBYTES* 8)(sp)
+	STORE x4,  (REGBYTES* 7)(sp)
+	STORE x3,  (REGBYTES* 6)(sp)
+	STORE x2,  (REGBYTES* 5)(sp) # sp
+	STORE x1,  (REGBYTES* 4)(sp) # ra
 
 	csrr s0, mcause
-	sw s0,	(4* 2)(sp)
+	STORE s0,  (REGBYTES* 2)(sp)
 
 	csrr s1, mstatus
-	sw s1,	(4 *1)(sp)
+	STORE s1,  (REGBYTES *1)(sp)
 
 	csrr s2, mepc
-	sw s2,	(4 *0)(sp)
+	STORE s2,  (REGBYTES *0)(sp)
 
 	# call interrupt handler
 	mv a0, sp
@@ -146,45 +148,45 @@ __trap_handler:
 	mv sp, a0
 
 
-	lw s0,	(4* 0)(sp)
+	LOAD s0,  (REGBYTES* 0)(sp)
 	csrw mepc, s0
 
-	lw s0,	(4* 1)(sp)
+	LOAD s0,  (REGBYTES* 1)(sp)
 	csrw mstatus, s0
 
-	lw x1,	(4* 4)(sp)
+	LOAD x1,  (REGBYTES* 4)(sp)
 
-	lw x3,	(4* 6)(sp)
-	lw x4,	(4* 7)(sp)
-	lw x5,	(4* 8)(sp)
-	lw x6,	(4* 9)(sp)
-	lw x7,	(4*10)(sp)
-	lw x8,	(4*11)(sp)
-	lw x9,	(4*12)(sp)
-	lw x10, (4*13)(sp)
-	lw x11, (4*14)(sp)
-	lw x12, (4*15)(sp)
-	lw x13, (4*16)(sp)
-	lw x14, (4*17)(sp)
-	lw x15, (4*18)(sp)
-	lw x16, (4*19)(sp)
-	lw x17, (4*20)(sp)
-	lw x18, (4*21)(sp)
-	lw x19, (4*22)(sp)
-	lw x20, (4*23)(sp)
-	lw x21, (4*24)(sp)
-	lw x22, (4*25)(sp)
-	lw x23, (4*26)(sp)
-	lw x24, (4*27)(sp)
-	lw x25, (4*28)(sp)
-	lw x26, (4*29)(sp)
-	lw x27, (4*30)(sp)
-	lw x28, (4*31)(sp)
-	lw x29, (4*32)(sp)
-	lw x30, (4*33)(sp)
-	lw x31, (4*34)(sp)
+	LOAD x3,  (REGBYTES* 6)(sp)
+	LOAD x4,  (REGBYTES* 7)(sp)
+	LOAD x5,  (REGBYTES* 8)(sp)
+	LOAD x6,  (REGBYTES* 9)(sp)
+	LOAD x7,  (REGBYTES*10)(sp)
+	LOAD x8,  (REGBYTES*11)(sp)
+	LOAD x9,  (REGBYTES*12)(sp)
+	LOAD x10, (REGBYTES*13)(sp)
+	LOAD x11, (REGBYTES*14)(sp)
+	LOAD x12, (REGBYTES*15)(sp)
+	LOAD x13, (REGBYTES*16)(sp)
+	LOAD x14, (REGBYTES*17)(sp)
+	LOAD x15, (REGBYTES*18)(sp)
+	LOAD x16, (REGBYTES*19)(sp)
+	LOAD x17, (REGBYTES*20)(sp)
+	LOAD x18, (REGBYTES*21)(sp)
+	LOAD x19, (REGBYTES*22)(sp)
+	LOAD x20, (REGBYTES*23)(sp)
+	LOAD x21, (REGBYTES*24)(sp)
+	LOAD x22, (REGBYTES*25)(sp)
+	LOAD x23, (REGBYTES*26)(sp)
+	LOAD x24, (REGBYTES*27)(sp)
+	LOAD x25, (REGBYTES*28)(sp)
+	LOAD x26, (REGBYTES*29)(sp)
+	LOAD x27, (REGBYTES*30)(sp)
+	LOAD x28, (REGBYTES*31)(sp)
+	LOAD x29, (REGBYTES*32)(sp)
+	LOAD x30, (REGBYTES*33)(sp)
+	LOAD x31, (REGBYTES*34)(sp)
 
-	addi sp, sp, (4*35)
+	addi sp, sp, (REGBYTES*35)
 	csrrw sp, mscratch, sp
 	mret
 
