@@ -52,7 +52,8 @@ Mkfile.old
 dkms.conf
 
 # build output
-out/
+obj/
+bin/
 
 # clangd config
 .clangd
