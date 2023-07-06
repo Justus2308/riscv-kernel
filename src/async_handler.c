@@ -26,6 +26,9 @@ const char* async_info[16] = {
 	/* 15 */	"Reserved",
 };
 
-void __attribute__((interrupt)) trap_handle_contained(void) {
+void
+__attribute__((interrupt))
+trap_handle_contained(void)
+{
 	
 }

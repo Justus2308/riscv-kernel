@@ -1,5 +1,15 @@
 include Makefile.config # BIDWIDTH is set there
 
+ifndef BITWIDTH
+	ERR := $(error Error: Makefile.config invalid or missing)
+else ifeq ($(BITWIDTH),64)
+	ABI := lp64d
+else ifeq ($(BITWIDTH),32)
+	ABI := ilp32d
+else
+	ERR := $(error Error: Invalid bit width. Check Makefile.config)
+endif
+
 SRC_DIR := src
 OBJ_DIR := obj
 OUT_DIR := bin
@@ -9,14 +19,6 @@ TARGET := $(OUT_DIR)/kernel-qemu-virt-rv$(BITWIDTH)gc
 SRCS := $(shell find $(SRC_DIR) -name '*.c' -or -name '*.S')
 OBJS := $(SRCS:%=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
-
-ifeq ($(BITWIDTH),64)
-	ABI := lp64d
-else ifeq ($(BITWIDTH),32)
-	ABI := ilp32d
-else
-	ERR := $(error Error: Invalid Makefile config. Check Makefile.config)
-endif
 
 CC := riscv64-unknown-elf-gcc
 CPPFLAGS := -MMD -MP -Iinclude/ -D__RV_BITWIDTH=$(BITWIDTH)
